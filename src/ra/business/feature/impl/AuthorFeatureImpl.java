@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AuthorFeatureImpl implements IAuthorFeature {
 	public static List<Author> authors = new ArrayList<>();
@@ -61,7 +62,7 @@ public class AuthorFeatureImpl implements IAuthorFeature {
 				author.setStatus(!author.isStatus());
 				addOrUpdate(author);
 			} else {
-				authors.remove(indexDelete);
+				authors = authors.stream().filter(item -> item.getAuthorId() != id).collect(Collectors.toList());
 			}
 		} else {
 			System.err.println("Không tồn tại author muốn xáo");

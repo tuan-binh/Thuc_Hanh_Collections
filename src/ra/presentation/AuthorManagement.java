@@ -6,8 +6,6 @@ import ra.business.feature.IAuthorFeature;
 import ra.business.feature.impl.AuthorFeatureImpl;
 import ra.business.feature.impl.BookFeatureImpl;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class AuthorManagement {
@@ -35,8 +33,10 @@ public class AuthorManagement {
 					addNewAuthor(scanner);
 					break;
 				case 3:
+					updateAuthor(scanner);
 					break;
 				case 4:
+					searchAuthorByName(scanner);
 					break;
 				case 5:
 					staticalAuthorBook();
@@ -53,14 +53,75 @@ public class AuthorManagement {
 		} while (isLoop);
 	}
 	
+	private static void searchAuthorByName(Scanner scanner) {
+		if (authorFeature.findAll().isEmpty()) {
+			System.err.println("Chưa có tác giả nào");
+			return;
+		}
+		boolean hasAuthor = false;
+		System.out.println("Nhập vào tên muốn tìm kiếm");
+		String keyword = scanner.nextLine().toLowerCase();
+		for (Author author : authorFeature.findAll()) {
+			if (author.getAuthorName().toLowerCase().contains(keyword)) {
+				hasAuthor = true;
+				author.displayData();
+			}
+		}
+		if (!hasAuthor) {
+			System.err.println("Không tìm thấy tác giả có tên là: " + keyword);
+		}
+	}
+	
+	private static void updateAuthor(Scanner scanner) {
+		System.out.println("nhập vào id author muốn update: ");
+		int idUpdate = Integer.parseInt(scanner.nextLine());
+		int indexUpdate = authorFeature.findIndexById(idUpdate);
+		if (indexUpdate >= 0) {
+			Author authorUpdate = AuthorFeatureImpl.authors.get(indexUpdate);
+			boolean isLoop = true;
+			authorUpdate.displayData();
+			do {
+				System.out.println("1. Update name");
+				System.out.println("2. Update description");
+				System.out.println("3. Update age");
+				System.out.println("4. Update status");
+				System.out.println("5. Exit");
+				System.out.println("Lựa chọn update: ");
+				int choiceUpdate = Integer.parseInt(scanner.nextLine());
+				switch (choiceUpdate) {
+					case 1:
+						System.out.println("Nhập lại tên: ");
+						authorUpdate.setAuthorName(scanner.nextLine());
+						break;
+					case 2:
+						System.out.println("Nhập lại mô tả");
+						authorUpdate.setDescription(scanner.nextLine());
+						break;
+					case 3:
+						System.out.println("Nhập lại tuổi");
+						authorUpdate.setAge(Integer.parseInt(scanner.nextLine()));
+						break;
+					case 4:
+						System.out.println("Nhập lại trạng thái");
+						authorUpdate.setStatus(Boolean.parseBoolean(scanner.nextLine()));
+						break;
+					case 5:
+						isLoop = false;
+						break;
+					default:
+						System.err.println("Vui lòng chọn lại từ 1 -> 5");
+				}
+			} while (isLoop);
+			System.out.println("Đã cập nhật thành công");
+			authorFeature.addOrUpdate(authorUpdate);
+		} else {
+			System.err.println("Không tồn tại author đó");
+		}
+	}
+	
 	private static void staticalAuthorBook() {
 		for (Author a : authorFeature.findAll()) {
-			int count = 0;
-			for (Book b : BookFeatureImpl.books) {
-				if (a.getAuthorId() == b.getAuthor().getAuthorId()) {
-					count++;
-				}
-			}
+			long count = BookFeatureImpl.books.stream().filter(book -> book.getAuthor().getAuthorId() == a.getAuthorId()).count();
 			a.displayData();
 			System.out.println("Số lượng sách = " + count);
 		}
